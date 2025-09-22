@@ -1,0 +1,10 @@
+[project]
+name = "mcp-helvarnet"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "aiohelvar>=0.9.7",
+    "fastmcp>=2.12.3",
+]
