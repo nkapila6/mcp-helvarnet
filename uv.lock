@@ -224,6 +224,15 @@ wheels = [
 ]
 
 [[package]]
+name = "clicker"
+version = "0.2.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ba/16/99c2a8482509d723b21682c01f721e0312fbe27da02b6a2717ea27b36a21/clicker-0.2.5.tar.gz", hash = "sha256:5b053a5529118656529e8bf9425379acfd9a5d3f65d9f97eef200c48e1d1fe8f", size = 4091, upload-time = "2018-10-17T03:36:43.787Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/64/c0770ed94cc90e14f753411f5b4eef8237cf38a9bed5b4050ab289ec2deb/clicker-0.2.5-py2.py3-none-any.whl", hash = "sha256:be35874497b74ca94ed84aa87d2662b7630893b081b8816aa2e48056d870f4c7", size = 5761, upload-time = "2018-10-17T03:36:41.267Z" },
+]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -636,6 +645,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "aiohelvar" },
+    { name = "clicker" },
     { name = "fastmcp" },
     { name = "typer" },
 ]
@@ -643,6 +653,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aiohelvar", specifier = ">=0.9.7" },
+    { name = "clicker", specifier = ">=0.2.5" },
     { name = "fastmcp", specifier = ">=2.12.3" },
     { name = "typer", specifier = ">=0.19.2" },
 ]
