@@ -9,8 +9,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "aiohelvar>=0.9.7",
+    "clicker>=0.2.5",
     "fastmcp>=2.12.3",
-    "typer>=0.19.2",
 ]
 
 license = "MIT"
