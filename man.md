@@ -84,4 +84,11 @@ Represents a Helvar config
 # static.py
 initiates (#define) different enums/dicts for different types of devices, protocols, etc
 
-
+# overall DAG
+Based on my understanding, overall DAG should be:
+1. make Router object
+2. call initiates on Router to init everything from Router
+3. et voila; do whatever you likey.
+  - router.devices: has methods from devices.py
+  - router.groups: has methods from groups.py
+  - router.scenes: has methods from scenes.py
