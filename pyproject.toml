@@ -8,9 +8,10 @@ description = "MCP server to control and potentially commission your Helvar Cont
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "aiohelvar>=0.9.7",
+    "aiohelvar",
     "clicker>=0.2.5",
     "fastmcp>=2.12.3",
+    "jupyter>=1.1.1",
 ]
 
 license = "MIT"
@@ -29,6 +30,9 @@ mcp-helvarnet = "mcp_helvarnet.main:mcp.run"
 
 [tool.ruff]
 fix=true
+
+[tool.uv.sources]
+aiohelvar = { git = "https://github.com/nkapila6/aiohelvar" }
 
 # [tool.hatch.build.targets.sdist]
 # include = ["embedder/*", "utils/*"]
