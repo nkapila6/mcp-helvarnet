@@ -124,8 +124,8 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
         """
         try:
             router = get_router()
-            # default ON scene is group.1.1
-            await _set_group_level_to_pct(router, group_id, 1, 1)
+            # default 75% scene is group.1.2
+            await _set_group_level_to_pct(router, group_id, 1, 2)
             return "Your lights should be switch ON shortly."
         except Exception as e:
             return str(e)
