@@ -9,54 +9,80 @@ Created on 2025-09-26 17:13:32
 Description: MCP server to control your Helvar DALI system using an LLM.... because why not?
 """
 
-import asyncio
 import logging
 import click
+import os
+from contextlib import asynccontextmanager
 
 from fastmcp import FastMCP
 
 from aiohelvar.router import Router
 
-mcp = FastMCP("mcp-helvarnet: control your Helvar DALI system")
+from .info import register_info_tools
+from .devices import register_device_tools
+from .groups import register_group_tools
+# from .scenes import register_scene_tools #TODO
+
 router: Router | None = None
 
-@click.command()
-@click.option("--host", "-h", default="localhost", help="router host/ip address")
-@click.option("--port", "-p", default=50000, type=int, help="router port for helvarnet (default: 50000 TCP or 50001 UDP)")
-def cli(host, port):
-    # incoming hostname and path from command line arguments
-    # TODO: trivial: check if no cmdline args, use env vars
-    asyncio.run(main(host, port))
+def get_router()->Router:
+    if router is None:
+        raise RuntimeError("Router not initialized. Please configure router connection first.")
+    return router
 
-async def main(host, port):
-    """
-    This function acts like an entry point to parse command line arguments before the MCP server starts. Function should exit or perhaps try again if router connect fails.
-
-    Further, the library guarantees that a connection remains alive thanks to the asyncio task.
-    """
-
+@asynccontextmanager
+async def lifespan(app: FastMCP, host: str, port: int):
+    """Manage the router connection lifecycle."""
     global router
-    console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
-    logging.getLogger().addHandler(console)
-
-    router = Router(host, port)
+    
+    logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler()])
 
     try:
-        await router.connect()
+        logging.info(f"Connecting to router at {host}:{port}...")
+        router = Router(host, port)
         await router.initialize()
-        logging.info("Router connected successfully. Starting MCP server.")
-        
-        # Keep the connection alive and monitor for updates in background
-        # The aiohelvar library automatically handles broadcast messages
-        # and updates internal state when the connection stays alive
-        mcp.run()
-
+        logging.info("Router connected successfully.")
+        yield
     except Exception as e:
         logging.error(f"Failed to connect to router: {e}")
-        logging.warning("Starting server without router connection")
-        # TODO: check how good performance is before I look into reconnects
+        logging.warning("Continuing without router connection.")
+        # router = None
+        yield
 
+HELVAR_HOST = os.getenv("HELVAR_HOST", "192.168.1.129")
+HELVAR_PORT = int(os.getenv("HELVAR_PORT", 50000))
+
+# from https://gofastmcp.com/integrations/fastapi#combining-lifespans
+mcp = FastMCP(
+    "mcp-helvarnet: control your Helvar DALI system",
+    lifespan=lambda app: lifespan(app, HELVAR_HOST, HELVAR_PORT),
+)
+
+register_info_tools(mcp, get_router)
+register_device_tools(mcp, get_router)
+register_group_tools(mcp, get_router)
+
+@click.command()
+@click.option(
+    "--host",
+    "-h",
+    default=HELVAR_HOST,
+    help="router host/ip address",
+    envvar="HELVAR_HOST",
+    show_default=True,
+)
+@click.option(
+    "--port",
+    "-p",
+    default=HELVAR_PORT,
+    type=int,
+    help="router port for helvarnet (default: 50000 TCP or 50001 UDP)",
+    envvar="HELVAR_PORT",
+    show_default=True,
+)
+def cli(host, port):
+    """MCP server to control your Helvar DALI system."""
+    mcp.run()
 
 if __name__ == "__main__":
     cli()
