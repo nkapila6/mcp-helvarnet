@@ -34,5 +34,10 @@ fix=true
 [tool.uv.sources]
 aiohelvar = { git = "https://github.com/nkapila6/aiohelvar" }
 
+[dependency-groups]
+dev = [
+    "pylint>=3.3.8",
+]
+
 # [tool.hatch.build.targets.sdist]
 # include = ["embedder/*", "utils/*"]
