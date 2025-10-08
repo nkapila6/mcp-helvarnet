@@ -9,14 +9,13 @@ Created on 2025-09-26 17:13:32
 Description: MCP server to control your Helvar DALI system using an LLM.... because why not?
 """
 
-import logging
-import click
-import os
 from contextlib import asynccontextmanager
-
-from fastmcp import FastMCP
+import logging
+import os
 
 from aiohelvar.router import Router
+from fastmcp import FastMCP
+import click
 
 from .info import register_info_tools
 from .devices import register_device_tools
@@ -34,23 +33,23 @@ def get_router()->Router:
 async def lifespan(app: FastMCP, host: str, port: int):
     """Manage the router connection lifecycle."""
     global router
-    
+
     logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler()])
 
     try:
-        logging.info(f"Connecting to router at {host}:{port}...")
+        logging.info("Connecting to router at %s:%d...", host, port)
         router = Router(host, port)
         await router.initialize()
         logging.info("Router connected successfully.")
         yield
     except Exception as e:
-        logging.error(f"Failed to connect to router: {e}")
+        logging.error(f"Failed to connect to router: %s", e)
         logging.warning("Continuing without router connection.")
         # router = None
         yield
 
 HELVAR_HOST = os.getenv("HELVAR_HOST", "192.168.1.129")
-HELVAR_PORT = int(os.getenv("HELVAR_PORT", 50000))
+HELVAR_PORT = int(os.getenv("HELVAR_PORT", "50000"))
 
 # from https://gofastmcp.com/integrations/fastapi#combining-lifespans
 mcp = FastMCP(

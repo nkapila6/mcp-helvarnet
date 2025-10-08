@@ -13,9 +13,9 @@ from fastmcp import FastMCP
 from aiohelvar import Router
 
 from aiohelvar.parser.command_type import (
-    COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE,
+    # COMMAND_TYPES_DONT_LISTEN_FOR_RESPONSE,
     CommandType,
-    MessageType,
+    # MessageType,
 )
 
 from aiohelvar.parser.address import SceneAddress, HelvarAddress
@@ -28,14 +28,14 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
 
     async def _fetch_groups(router)->Dict[str, Dict[str,str]]:
         """Fetch all available lighting groups and their descriptions."""
-        
+
         response = await router._send_command_task(Command(CommandType.QUERY_GROUPS))
         group_ids = response.result.split(",")
         groups={}
-        
+
         for group_id in group_ids:
             group_id = group_id.strip()
-            if group_id: 
+            if group_id:
                 int(group_id)
 
                 group_name = await router._send_command_task(
@@ -53,19 +53,24 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
         return groups
 
     async def _set_group_level_to_pct(
-        router: Router, 
-        group_id: Annotated[str, Field(description="Group ID number or group name to control. Can be numeric like '5' or descriptive like 'Living Room'")],
+        router: Router,
+        group_id: Annotated[str, Field(description="Group ID number or group name to control." \
+                                       " Can be numeric like '5' or descriptive" \
+                                       " like 'Living Room'")],
         block_id: Annotated[int, Field(description="Block ID for the scene (usually 1)", ge=1)] = 1,
-        scene_id: Annotated[int, Field(description="Scene ID within the block. Different scenes represent different brightness levels (1=ON, 2=75%, 3=50%, 4=25%, 5=10%, 8=OFF)", ge=1)] = 1
+        scene_id: Annotated[int, Field(description="Scene ID within the block." \
+                                       " Different scenes represent different brightness levels"
+                                       " (1=ON, 2=75%, 3=50%, 4=25%, 5=10%, 8=OFF)", ge=1)] = 1
     ) -> dict:
 
         if not group_id.isdigit():
             gdict = await _fetch_groups(router)
             gdict = [k for k,v in gdict.items() if v['name']==group_id]
-            if (len(gdict)==0):
-                return {"result": "Sorry, not able to find the group by name, please specify group number."}
+            if not gdict:
+                return {"result": "Sorry, not able to find the group by name,"
+                        " please specify group number."}
             group_id = gdict[0] # always assume we get only exact match
-            
+
         scene_address = SceneAddress(int(group_id), block_id, scene_id)
 
         # TODO: add fade times later
@@ -80,14 +85,14 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
                     ],
                 )
         )
-        
+
         return {"result": "Your group should be set to the scene shortly."}
 
 
     @mcp.tool()
     async def get_all_groups() -> Dict[str, Any]:
         """Fetch all available lighting groups and their descriptions.
-        
+
         Retrieves a complete list of all lighting groups configured in the system,
         including their group numbers and human-readable names/descriptions.
         """
@@ -100,10 +105,12 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
 
     @mcp.tool()
     async def switch_on_group(
-        group_id: Annotated[str, Field(description="Group ID number or group name to turn on. Can be either a numeric ID like '5' or a descriptive name like 'Living Room'")]
+        group_id: Annotated[str, Field(description="Group ID number or group name to turn on." \
+                                       " Can be either a numeric ID like '5'"
+                                       " or a descriptive name like 'Living Room'")]
     ) -> str:
         """Turn on a lighting group to full brightness.
-        
+
         Activates the default ON scene for the specified lighting group,
         setting all lights in the group to maximum brightness.
         """
@@ -117,10 +124,12 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
 
     @mcp.tool()
     async def set_group_to_75_percent(
-        group_id: Annotated[str, Field(description="Group ID number or group name to set to 75% brightness. Examples: '3', 'Kitchen', 'Bedroom Lights'")]
+        group_id: Annotated[str, Field(description="Group ID number or group name to set to" \
+                                       " 75% brightness. Examples: '3'," \
+                                       " 'Kitchen', 'Bedroom Lights'")]
     ) -> str:
         """Set a lighting group to 75% brightness.
-        
+
         Perfect for normal room lighting when you want bright but not maximum illumination.
         """
         try:
@@ -133,10 +142,12 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
 
     @mcp.tool()
     async def set_group_to_50_percent(
-        group_id: Annotated[str, Field(description="Group ID number or group name to set to 50% brightness. Examples: '3', 'Kitchen', 'Bedroom Lights'")]
+        group_id: Annotated[str, Field(description="Group ID number or group name" \
+                                       " to set to 50% brightness." \
+                                       " Examples: '3', 'Kitchen', 'Bedroom Lights'")]
     ) -> str:
         """Set a lighting group to 50% brightness.
-        
+
         Ideal for comfortable ambient lighting or when you want moderate illumination.
         """
         try:
@@ -149,10 +160,12 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
 
     @mcp.tool()
     async def set_group_to_25_percent(
-        group_id: Annotated[str, Field(description="Group ID number or group name to set to 25% brightness. Examples: '3', 'Kitchen', 'Bedroom Lights'")]
+        group_id: Annotated[str, Field(description="Group ID number or group name" \
+                                       " to set to 25% brightness." \
+                                       " Examples: '3', 'Kitchen', 'Bedroom Lights'")]
     ) -> str:
         """Set a lighting group to 25% brightness.
-        
+
         Great for evening lighting, watching TV, or creating a cozy atmosphere.
         """
         try:
@@ -164,11 +177,14 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
 
     @mcp.tool()
     async def set_group_to_10_percent(
-        group_id: Annotated[str, Field(description="Group ID number or group name to set to 10% brightness for very dim ambient lighting. Examples: '3', 'Kitchen', 'Bedroom Lights'")]
+        group_id: Annotated[str, Field(description="Group ID number or group name to set to 10%" \
+                                       " brightness for very dim ambient lighting. Examples: '3'," \
+                                       " 'Kitchen', 'Bedroom Lights'")]
     ) -> str:
         """Set a lighting group to 10% brightness (very dim lighting).
-        
-        Perfect for nighttime navigation, sleeping with minimal light, or creating a very subtle ambient glow.
+
+        Perfect for nighttime navigation, sleeping with minimal light, or creating a very subtle
+        ambient glow.
         """
         try:
             router = get_router()
@@ -180,25 +196,30 @@ def register_group_tools(mcp: FastMCP, get_router: Callable[[], Router]):
 
     @mcp.tool()
     async def switch_off_group(
-        group_id: Annotated[str, Field(description="Group ID number or group name to turn off completely. Examples: '3', 'Kitchen', 'Bedroom Lights'")]
+        group_id: Annotated[str, Field(description="Group ID number or group name to turn off" \
+                                       " completely. Examples: '3', 'Kitchen', 'Bedroom Lights'")]
     ) -> str:
         """Turn off a lighting group completely.
-        
+
         Turns off all lights in the group to save energy.
         """
         try:
             router = get_router()
             # default OF scene is group.1.8
-            await _set_group_level_to_pct(router, group_id, 1, 8)    
+            await _set_group_level_to_pct(router, group_id, 1, 8)
             return "Your lights should switch OFF shortly."
         except Exception as e:
             return str(e)
 
     @mcp.tool()
     async def set_group_level_to_scene(
-        group_id: Annotated[str, Field(description="Group ID number or group name to control. Can be numeric like '5' or descriptive like 'Living Room'")],
+        group_id: Annotated[str, Field(description="Group ID number or group name to control." \
+                                       " Can be numeric like '5'"
+                                       " or descriptive like 'Living Room'")],
         block_id: Annotated[int, Field(description="Block ID for the scene (usually 1)", ge=1)] = 1,
-        scene_id: Annotated[int, Field(description="Scene ID within the block. Different scenes represent different brightness levels (1=ON, 2=75%, 3=50%, 4=25%, 5=10%, 8=OFF)", ge=1)] = 1
+        scene_id: Annotated[int, Field(description="Scene ID within the block. Different scenes" \
+                                       " represent different brightness levels"
+                                       " (1=ON, 2=75%, 3=50%, 4=25%, 5=10%, 8=OFF)", ge=1)] = 1
     ) -> dict:
         """Recall a scene for a group by providing group, block and scene ids."""
         try:

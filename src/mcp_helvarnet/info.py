@@ -6,8 +6,9 @@ Created on 2025-09-27 16:00:58 Saturday
 @author: Nikhil Kapila
 """
 
+from typing import Dict, Any, Callable
+
 from aiohelvar import Router
-from typing import Annotated, Dict, Any, Callable
 from pydantic import Field
 from fastmcp import FastMCP
 
@@ -17,7 +18,7 @@ def register_info_tools(mcp:FastMCP, get_router:Callable[[], Router]):
     @mcp.tool()
     def get_router_overview() -> Dict[str, Any]:
         """Get a comprehensive overview of the router's devices and groups.
-        
+
         Retrieves all devices and groups configured on the Helvar router system.
         This provides a complete inventory of what lighting devices and groups
         are available for control.
@@ -27,8 +28,8 @@ def register_info_tools(mcp:FastMCP, get_router:Callable[[], Router]):
             router_devices = {} # device address
             router_groups = {} # group address
             # TODO: scene blocks can be HUGE! check later for those ones with names and return
-            # router_scenes = {} 
-            
+            # router_scenes = {}
+
             # router devices
             for key, value in router.devices.devices.items():
                 # key is addr, value is desc
@@ -77,7 +78,7 @@ def register_info_tools(mcp:FastMCP, get_router:Callable[[], Router]):
         except Exception as e:
             return {"error": str(e)}
 
-    @mcp.tool()   
+    @mcp.tool()
     def get_port() -> Dict[str, Any]:
         """Get the network port of the Helvar router."""
         try:
